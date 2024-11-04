@@ -8,7 +8,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
-    private static final Connection conn = Util.getInstance().getConnection();
+    private static final Connection conn;
+
+    static {
+        try {
+            conn = Util.getInstance().getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     //Класс dao должен иметь конструктор пустой/по умолчанию
     public UserDaoJDBCImpl() {
@@ -18,6 +26,7 @@ public class UserDaoJDBCImpl implements UserDao {
     /*  Создание таблицы для User(ов) не должно приводить
      к исключению, если такая таблица уже существует
      */
+    @Override
     public void createUsersTable() {
         try (Statement statement = conn.createStatement()) {
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS users " +
@@ -31,6 +40,7 @@ public class UserDaoJDBCImpl implements UserDao {
     /*  Удаление таблицы User(ов) — не должно приводить
      к исключению, если таблицы не существует
  */
+    @Override
     public void dropUsersTable() {
         try (Statement statement = conn.createStatement()) {
             statement.executeUpdate("DROP TABLE IF EXISTS users");
@@ -40,8 +50,8 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
 
-
     // Добавление User в таблицу
+    @Override
     public void saveUser(String name, String lastName, byte age) {
         try (PreparedStatement pstm = conn.prepareStatement("INSERT INTO users (name, last_name, age) VALUES (?, ?, ?)")) {
             pstm.setString(1, name);
@@ -50,28 +60,38 @@ public class UserDaoJDBCImpl implements UserDao {
             pstm.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
+            try {
+                conn.rollback();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
         }
     }
 
 
-
     // Удаление User из таблицы (по id)
+    @Override
     public void removeUserById(long id) {
         try (PreparedStatement pstm = conn.prepareStatement("DELETE FROM users WHERE id = ?")) {
             pstm.setLong(1, id);
             pstm.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
+            try {
+                conn.rollback();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
         }
     }
 
 
-
     // Получение всех User(ов) из таблицы
+    @Override
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
         try (ResultSet resultSet = conn.createStatement().executeQuery("SELECT * FROM users")) {
-            while(resultSet.next()) {
+            while (resultSet.next()) {
                 User user = new User(resultSet.getString("name"),
                         resultSet.getString("last_name"), resultSet.getByte("age"));
                 user.setId(resultSet.getLong("id"));
@@ -84,13 +104,18 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
 
-
     // Очистка содержания таблицы
+    @Override
     public void cleanUsersTable() {
         try (Statement statement = conn.createStatement()) {
             statement.executeUpdate("TRUNCATE TABLE users");
         } catch (SQLException e) {
             e.printStackTrace();
+            try {
+                conn.rollback();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
         }
     }
 }
