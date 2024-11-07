@@ -1,42 +1,42 @@
 package jm.task.core.jdbc.util;
 
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import jm.task.core.jdbc.model.User;
+import org.hibernate.HibernateException;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.cfg.Environment;
+
 import java.util.Properties;
 
 public class Util {
-    // реализуйте настройку соеденения с БД
-    private static Connection conn = null;
-    private static Util instance = null;
 
-    private static final String URL = "jdbc:mysql://localhost:3306/mydbtest";
-    private static final String USERNAME = "root";
-    private static final String PASSWORD = "root";
+    private static final String DB_DRIVER = "com.mysql.cj.jdbc.Driver";
+    private static final String DB_DIALECT = "org.hibernate.dialect.MySQLDialect";
 
-    private Util() throws SQLException {
-        try {
-            conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-            if (!conn.isClosed()) {
-                System.out.println("Соединение с БД установлено!");
-            }
-        } catch (SQLException e) {
-            System.out.println("Не удалось загрузить класс драйвера!");
-        } finally {
-            conn.isClosed();
+    private final static String URL = "jdbc:mysql://localhost:3306/mydbtest";
+    private static final String USER = "root";
+    private static final String PASS = "root";
+
+    public Util() {
+    }
+
+    static SessionFactory sessionFactory;
+
+    public static SessionFactory getSessionFactory() throws HibernateException {
+        if (sessionFactory == null) {
+            Properties dbSettings = new Properties();
+            dbSettings.put(Environment.URL, URL);
+            dbSettings.put(Environment.USER, USER);
+            dbSettings.put(Environment.PASS, PASS);
+            dbSettings.put(Environment.DRIVER, DB_DRIVER);
+            dbSettings.put(Environment.DIALECT, DB_DIALECT);
+
+            sessionFactory = new Configuration().addProperties(dbSettings)
+                    .addAnnotatedClass(User.class)
+                    .buildSessionFactory();
         }
+        return sessionFactory;
     }
 
-
-    public static Util getInstance() throws SQLException {
-        if (null == instance) {
-            instance = new Util();
-        }
-        return instance;
-    }
-
-    public Connection getConnection() {
-        return conn;
-    }
 }
+
