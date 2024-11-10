@@ -8,7 +8,8 @@ import java.sql.SQLException;
 import java.util.List;
 
 public class UserServiceImpl implements UserService {
-    UserDao userDao = new UserDaoHibernateImpl();
+
+    private final UserDao userDao = new UserDaoHibernateImpl();
 
 
     @Override
@@ -18,21 +19,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void dropUsersTable() {
-
         userDao.dropUsersTable();
+        System.out.println("Таблица User(ов) удалена!");
     }
 
     @Override
     public void saveUser(String name, String lastName, byte age) {
 
         userDao.saveUser(name, lastName, age);
-        System.out.println("User с именем – " + name + " добавлен в базу данных");
+        System.out.println("User с именем – " + name + " - добавлен в базу данных");
     }
 
     @Override
     public void removeUserById(long id) {
 
         userDao.removeUserById(id);
+        System.out.println("User с id – " + id + " - удален из базы данных");
     }
 
     @Override
@@ -47,5 +49,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public void cleanUsersTable() {
         userDao.cleanUsersTable();
+        System.out.println("Таблица User(ов) очищена!");
     }
 }

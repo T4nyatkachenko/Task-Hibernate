@@ -16,11 +16,12 @@ public class Util {
     private final static String URL = "jdbc:mysql://localhost:3306/mydbtest";
     private static final String USER = "root";
     private static final String PASS = "root";
+    private static SessionFactory sessionFactory;
 
-    public Util() {
+
+    private Util() {
     }
 
-    static SessionFactory sessionFactory;
 
     public static SessionFactory getSessionFactory() throws HibernateException {
         if (sessionFactory == null) {
@@ -36,6 +37,10 @@ public class Util {
                     .buildSessionFactory();
         }
         return sessionFactory;
+    }
+
+    public static void sessionFactoryClose() {
+        sessionFactory.close();
     }
 
 }
