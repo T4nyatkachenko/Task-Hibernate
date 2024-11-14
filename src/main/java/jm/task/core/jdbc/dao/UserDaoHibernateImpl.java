@@ -33,9 +33,6 @@ public class UserDaoHibernateImpl implements UserDao {
                     .executeUpdate();
             transaction.commit();
         } catch (HibernateException e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
             e.printStackTrace();
         }
 
@@ -104,9 +101,6 @@ public class UserDaoHibernateImpl implements UserDao {
             users = session.createNativeQuery("SELECT * FROM users", User.class).getResultList();
             transaction.commit();
         } catch (HibernateException e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
             e.printStackTrace();
         }
         return users;
